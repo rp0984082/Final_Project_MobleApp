@@ -8,36 +8,45 @@
 import Foundation
 
 class AllPokemonModel: ObservableObject {
-    @Published var pokemonList: [PokemonSpriteItem] = []
+    @Published var pokemonList: [PokemonItem] = []
+    @Published var errorMessage: String?
 
     func fetchAllPokemon() {
+        errorMessage = nil
+
         guard let url = URL(string: "https://pokeapi.co/api/v2/pokemon?limit=151") else {
-            print("Invalid URL")
+            errorMessage = "Invalid URL"
             return
         }
 
         URLSession.shared.dataTask(with: url) { data, response, error in
-            if let data = data {
+            DispatchQueue.main.async {
+                if let error = error {
+                    self.errorMessage = "Network error: \(error.localizedDescription)"
+                    return
+                }
+
+                guard let data = data else {
+                    self.errorMessage = "No data received"
+                    return
+                }
+
                 do {
                     let decodedResponse = try JSONDecoder().decode(PokemonListResponse.self, from: data)
-                    DispatchQueue.main.async {
-                        self.pokemonList = decodedResponse.results
-                    }
+                    self.pokemonList = decodedResponse.results
                 } catch {
-                    print("Decoding error: \(error)")
+                    self.errorMessage = "Decoding error: \(error.localizedDescription)"
                 }
-            } else if let error = error {
-                print("HTTP Request Failed: \(error)")
             }
         }.resume()
     }
 }
 
 struct PokemonListResponse: Codable {
-    let results: [PokemonSpriteItem]
+    let results: [PokemonItem]
 }
 
-struct PokemonSpriteItem: Codable, Identifiable {
+struct PokemonItem: Codable, Identifiable {
     let name: String
     let url: String
     var id: String { name }

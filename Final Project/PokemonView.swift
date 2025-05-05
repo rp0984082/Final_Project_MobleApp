@@ -12,31 +12,16 @@ struct PokemonView: View {
 
     var body: some View {
         NavigationStack {
-            ScrollView {
-                LazyVStack(spacing: 12) {
-                    if viewModel.pokemonList.isEmpty {
-                        ProgressView("Loading Pokémon...")
-                            .padding()
-                    } else {
-                        ForEach(viewModel.pokemonList) { pokemon in
-                            HStack {
-                                AsyncImage(url: URL(string: pokemon.sprites.front_default)) { image in
-                                    image.resizable()
-                                } placeholder: {
-                                    Color.gray.opacity(0.2)
-                                }
-                                .frame(width: 60, height: 60)
-
-                                Text(pokemon.name.capitalized)
-                                    .font(.headline)
-
-                                Spacer()
-                            }
-                            .padding(.horizontal)
-                        }
+            VStack {
+                if let error = viewModel.errorMessage {
+                    Text(error)
+                        .foregroundColor(.red)
+                        .padding()
+                } else {
+                    List(viewModel.pokemonList) { pokemon in
+                        Text(pokemon.name.capitalized)
                     }
                 }
-                .padding(.top)
             }
             .navigationTitle("All Pokémon")
             .onAppear {
@@ -44,4 +29,8 @@ struct PokemonView: View {
             }
         }
     }
+}
+
+#Preview {
+    PokemonView()
 }
