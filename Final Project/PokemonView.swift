@@ -19,7 +19,23 @@ struct PokemonView: View {
                         .padding()
                 } else {
                     List(viewModel.pokemonList) { pokemon in
-                        Text(pokemon.name.capitalized)
+                        HStack {
+                            if let imageURL = pokemon.imageURL {
+                                AsyncImage(url: imageURL) { image in
+                                    image
+                                        .resizable()
+                                        .scaledToFit()
+                                        .frame(width: 50, height: 50)
+                                } placeholder: {
+                                    ProgressView()
+                                        .frame(width: 50, height: 50)
+                                }
+                            }
+
+                            Text(pokemon.name.capitalized)
+                                .font(.headline)
+                        }
+                        .padding(.vertical, 4)
                     }
                 }
             }
@@ -34,3 +50,4 @@ struct PokemonView: View {
 #Preview {
     PokemonView()
 }
+

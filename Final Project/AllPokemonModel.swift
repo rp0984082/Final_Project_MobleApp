@@ -23,11 +23,13 @@ class AllPokemonModel: ObservableObject {
             DispatchQueue.main.async {
                 if let error = error {
                     self.errorMessage = "Network error: \(error.localizedDescription)"
+                    self.pokemonList = []
                     return
                 }
 
                 guard let data = data else {
                     self.errorMessage = "No data received"
+                    self.pokemonList = []
                     return
                 }
 
@@ -36,6 +38,7 @@ class AllPokemonModel: ObservableObject {
                     self.pokemonList = decodedResponse.results
                 } catch {
                     self.errorMessage = "Decoding error: \(error.localizedDescription)"
+                    self.pokemonList = []
                 }
             }
         }.resume()
@@ -50,4 +53,10 @@ struct PokemonItem: Codable, Identifiable {
     let name: String
     let url: String
     var id: String { name }
+
+    // Extract ID from URL to construct image URL
+    var imageURL: URL? {
+        guard let id = url.split(separator: "/").last(where: { !$0.isEmpty }) else { return nil }
+        return URL(string: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/\(id).png")
+    }
 }
